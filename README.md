@@ -62,13 +62,40 @@ Because only server code reads the variable, the key never appears in the client
 
 ## Answer accuracy
 
+Malformed Groq responses are rejected with a visible error: replies must be
+non-empty, and usage must contain non-negative integer token counts with consistent
+totals. Optional timing metadata must be finite and non-negative. Failed responses
+do not append an assistant reply or update session counters; retry remains available.
+
 The server prepends instructions with the current UTC date to every request.
 The assistant is instructed to acknowledge uncertainty, avoid invented sources or
 current-data claims, and ask for location and experience before estimating salaries.
 These instructions also apply to existing conversations; they do not rewrite old replies.
-The UI warns that this chat has no live web access. Prompt instructions reduce
+When web search is off, the UI warns that answers are not live-verified. Prompt instructions reduce
 overconfident answers but cannot guarantee correctness or provide verified current data.
 Check important claims against reliable, current sources.
+
+### Optional Exa web search
+
+1. Create a key at <https://dashboard.exa.ai/api-keys>.
+2. Add `EXA_API_KEY=your_key` to `.env.local` and restart the server.
+3. Enable **Search the web** above the input.
+
+The server calls Exa's search API directly using a private key, then passes up to
+five source excerpts to Groq as untrusted reference data. No MCP setup is needed.
+Only the first 400 characters of your latest message go to Exa; include the subject
+and location in follow-up questions. Queries use Exa credits and are processed by Exa.
+Search is enabled automatically when the app opens or reloads; no login is required.
+You can turn it off using the checkbox. Enabled requests use Exa credits.
+
+Replies include clickable retrieved sources and publication dates when supplied.
+Sources persist with the conversation and are removed by Clear Conversation.
+Retrieved sources are not proof that every generated claim is supported or current.
+The model is instructed to cite relevant evidence and acknowledge uncertainty.
+Search errors (missing key, network issues, quota limits, empty results) stop the
+request with a visible error; no silent model-only fallback occurs. Retry or turn
+off search to continue normally. Groq token totals include the added search context;
+Exa credit consumption is separate and is not included in the token panel.
 
 ## State and persistence
 

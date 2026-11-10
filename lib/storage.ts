@@ -1,5 +1,6 @@
 import { DEFAULT_MODEL, isSupportedModel, type ModelId } from "./models";
 import { emptyStats } from "./stats";
+import { isWebSource } from "./exa";
 import type { ChatMessage, SessionStats } from "./types";
 
 /** Conversation history + cumulative token stats (removed on "Clear conversation"). */
@@ -21,7 +22,9 @@ export function isChatMessage(value: unknown): value is ChatMessage {
   const m = value as Record<string, unknown>;
   return (
     (m.role === "user" || m.role === "assistant") &&
-    typeof m.content === "string"
+    typeof m.content === "string" &&
+    (m.sources === undefined ||
+      (Array.isArray(m.sources) && m.sources.every(isWebSource)))
   );
 }
 

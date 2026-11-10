@@ -22,6 +22,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { status, body: payload } = await handleChat(body, getApiKey());
+  const { status, body: payload } = await handleChat(
+    body, getApiKey(), fetch, process.env.EXA_API_KEY,
+  );
   return Response.json(payload, { status });
 }

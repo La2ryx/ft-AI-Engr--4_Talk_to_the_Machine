@@ -132,4 +132,45 @@ describe("handleChat", () => {
     const result = await handleChat(body, "k", fetchMock);
     expect(result.status).toBe(502);
   });
+
+  it.each([
+    undefined, null, {}, [],
+    { prompt_tokens: "10", completion_tokens: 5, total_tokens: 15 },
+    { prompt_tokens: -1, completion_tokens: 5, total_tokens: 4 },
+    { prompt_tokens: 1.5, completion_tokens: 5, total_tokens: 6.5 },
+    { prompt_tokens: 10, completion_tokens: 5, total_tokens: 99 },
+    { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15, total_time: -1 },
+    { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15, completion_time: "fast" },
+  ])("rejects malformed usage %# instead of returning successful zero totals", async (usage) => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      choices: [{ message: { content: "Hello" } }], usage,
+    }));
+    const result = await handleChat(body, "k", fetchMock);
+    expect(result.status).toBe(502);
+    expect(result.body).toEqual({ error: expect.stringContaining("invalid token usage") });
+    expect(result.body).not.toHaveProperty("reply");
+    expect(result.body).not.toHaveProperty("usage");
+  });
+
+  it.each([null, [], "text", 123, { choices: {} }, { choices: [null] },
+    { choices: [{ message: null }] }, { choices: [{ message: { content: " " } }] },
+  ])("rejects malformed response structure %# without throwing", async (data) => {
+    const result = await handleChat(body, "k", vi.fn().mockResolvedValue(jsonResponse(data)));
+    expect(result.status).toBe(502);
+    expect(result.body).toHaveProperty("error");
+  });
+
+  it("reports invalid JSON as an upstream error", async () => {
+    const result = await handleChat(body, "k", vi.fn().mockResolvedValue(new Response("{broken")));
+    expect(result.status).toBe(502);
+  });
+
+  it("accepts valid zero usage without inventing token consumption", async () => {
+    const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+    const result = await handleChat(body, "k", vi.fn().mockResolvedValue(jsonResponse({
+      choices: [{ message: { content: "Hello" } }], usage,
+    })));
+    expect(result.status).toBe(200);
+    expect(result.body).toHaveProperty("usage", usage);
+  });
 });

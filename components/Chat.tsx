@@ -28,6 +28,7 @@ export default function Chat() {
   const [sessionStats, setSessionStats] = useState<SessionStats>(emptyStats);
   const [model, setModel] = useState<ModelId>(DEFAULT_MODEL);
   const [hydrated, setHydrated] = useState(false);
+  const [webSearch, setWebSearch] = useState(true);
 
   // localStorage is only available in the browser, so restore after mount.
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function Chat() {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history, model }),
+          body: JSON.stringify({ messages: history, model, webSearch }),
         });
         const data = (await res.json().catch(() => null)) as
           | ChatApiSuccess
@@ -77,7 +78,7 @@ export default function Chat() {
         const elapsed = performance.now() - started;
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.reply },
+          { role: "assistant", content: data.reply, ...(data.sources ? { sources: data.sources } : {}) },
         ]);
         setSessionStats((prev) =>
           accumulateStats(prev, data.usage, elapsed, data.model),
@@ -94,7 +95,7 @@ export default function Chat() {
         setIsLoading(false);
       }
     },
-    [model],
+    [model, webSearch],
   );
 
   const handleSubmit = () => {
@@ -139,7 +140,7 @@ export default function Chat() {
             Chat powered by Groq &middot; full history sent every turn
           </p>
           <p className="text-xs text-zinc-500">
-            No live web access. Answers may be inaccurate or outdated; verify important facts.
+            {webSearch ? "Exa web search enabled. Check source dates and verify important facts." : "Web search off. Answers may be inaccurate or outdated; verify important facts."}
           </p>
         </header>
 
@@ -178,6 +179,13 @@ export default function Chat() {
           </div>
         )}
 
+        <div className="px-6 py-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={webSearch} disabled={isLoading || !hydrated} onChange={(event) => setWebSearch(event.target.checked)} />
+            Search the web
+          </label>
+          <p className="text-xs text-zinc-500">Sends up to 400 characters of your latest message to Exa; uses search credits. Include context in follow-up questions.</p>
+        </div>
         <ChatInput
           value={input}
           onChange={setInput}

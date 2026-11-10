@@ -3,6 +3,13 @@ export type Role = "user" | "assistant";
 export interface ChatMessage {
   role: Role;
   content: string;
+  sources?: WebSource[];
+}
+
+export interface WebSource {
+  title: string;
+  url: string;
+  publishedDate?: string;
 }
 
 /** Raw `usage` object returned by Groq (OpenAI-compatible). Times are in seconds. */
@@ -39,12 +46,14 @@ export interface SessionStats {
 export interface ChatApiRequest {
   messages: ChatMessage[];
   model: string;
+  webSearch?: boolean;
 }
 
 export interface ChatApiSuccess {
   reply: string;
   model: string;
   usage: GroqUsage;
+  sources?: WebSource[];
 }
 
 export interface ChatApiError {

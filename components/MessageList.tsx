@@ -51,6 +51,21 @@ export default function MessageList({ messages, isLoading, hydrated }: Props) {
               ) : (
                 <p className="whitespace-pre-wrap">{m.content}</p>
               )}
+              {m.role === "assistant" && m.sources?.length ? (
+                <section aria-label="Web search sources" className="mt-4 border-t border-zinc-300 pt-3 dark:border-zinc-700">
+                  <p className="mb-1 text-xs font-semibold">Exa search sources</p>
+                  <ul className="space-y-2">
+                    {m.sources.map((source, index) => (
+                      <li key={`${index}-${source.url}`}>
+                        <a className="text-xs text-blue-600 underline dark:text-blue-300" href={source.url} target="_blank" rel="noopener noreferrer">{source.title || source.url}</a>
+                        <p className="text-xs text-zinc-500">
+                          Published: {source.publishedDate ?? "date unavailable"}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
             </div>
           </li>
         ))}
