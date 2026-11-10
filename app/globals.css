@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+button:not(:disabled), select:not(:disabled), summary {
+  cursor: pointer;
+}
+
+details[open] + .mobile-telemetry {
+  display: flex;
+}
+
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 3px;
+}
+
+.message-markdown {
+  overflow-wrap: anywhere;
+}
+
+.message-markdown > * + * {
+  margin-top: 0.75rem;
+}
+
+.message-markdown :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 650;
+  line-height: 1.4;
+  margin-top: 1rem;
+}
+
+.message-markdown h1 { font-size: 1.35rem; }
+.message-markdown h2 { font-size: 1.2rem; }
+.message-markdown h3 { font-size: 1.05rem; }
+.message-markdown :is(ul, ol) { padding-left: 1.5rem; }
+.message-markdown ul { list-style-type: disc; }
+.message-markdown ol { list-style-type: decimal; }
+.message-markdown li + li { margin-top: 0.25rem; }
+.message-markdown a { color: #2563eb; text-decoration: underline; }
+.message-markdown blockquote { border-left: 3px solid #a1a1aa; padding-left: 1rem; }
+.message-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: #18181b;
+  color: #f4f4f5;
+  padding: 1rem;
+}
+.message-markdown code { font-family: var(--font-mono), monospace; font-size: 0.85em; }
+.message-markdown :not(pre) > code { background: #71717a20; border-radius: 0.25rem; padding: 0.15rem 0.3rem; }
+.message-markdown table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.message-markdown :is(th, td) { border: 1px solid #a1a1aa60; padding: 0.5rem 0.75rem; text-align: left; }
+.message-markdown th { background: #71717a15; font-weight: 600; }
+.message-markdown hr { border-color: #a1a1aa60; margin-block: 1rem; }
+
+@media (prefers-color-scheme: dark) {
+  .message-markdown a { color: #93c5fd; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; }
+}
